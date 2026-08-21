@@ -1,74 +1,75 @@
+import axios from "axios";
 import { createContext, useState, type ReactNode } from "react";
 import type UsuarioLogin from "../models/UsuarioLogin";
-import axios from "axios";
 import { login } from "../services/Service";
 
-// Definir os Estado e Funções Disponibilizadas pela Context
+// Definir os Estados e Funções disponibilizadas pela Context
 interface AuthContextProps {
-    usuario: UsuarioLogin
-    handleLogin(usuario: UsuarioLogin): void
-    handleLogout(): void
-    isLoading: boolean
+	usuario: UsuarioLogin
+	handleLogin(usuario: UsuarioLogin): void
+	handleLogout(): void
+	isLoading: boolean
 }
 
-// Quem irá consumia a context
+// Quem irá consumir a context
 interface AuthProviderProps {
-    children: ReactNode
+	children: ReactNode
 }
 
-// criar o contexto usando a tipagem AuthContextProps
-//  O contexto iré disponibilizar os estados e as funções globalmente
+// Criar o contexto usando a tipagem AuthContextProps
+// O Contexto irá disponibilizar os estados e as funções globalmente
 export const AuthContext = createContext({} as AuthContextProps)
 
-// Inicializar o provedor Authprovider 
-// O provedor irá impolementar as funções e inicializar os estados
+// Inicializar o provedor AuthProvider
+// O provedor irá implementar as funções e inicializar os estados
 export function AuthProvider({ children }: AuthProviderProps) {
+	// Inicializar o estado usuario, que é do tipo UsuarioLogin
+	const [usuario, setUsuario] = useState<UsuarioLogin>({
+		id: 0,
+		nome: "",
+		usuario: "",
+		senha: "",
+		foto: "",
+		token: "",
+	})
 
-    // inicializar o estado usuario, que é do tipo UsuarioLogin
-    const [usuario, setUsuario] = useState<UsuarioLogin>({
-        id: 0,
-        nome: '',
-        usuario: '',
-        senha: '',
-        foto: '',
-        token: '',
-    })
+	// Inicializar o estado isLoading
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    // innicializador 
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+	// Implementar a função handleLogin (autenticar usuário)
+	async function handleLogin(usuarioLogin: UsuarioLogin) {
+		setIsLoading(true)
 
-    async function handleLogin(usuarioLogin: UsuarioLogin) {
+		try {
+			await login(`/usuarios/logar`, usuarioLogin, setUsuario)
+			alert("Usuário Autenticado com sucesso!")
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				alert(`Erro ao autenticar o usuário (${error.response?.status})`)
+				return
+			}
+		} finally {
+			setIsLoading(false)
+		}
+	}
 
-        setIsLoading(true)
+	// Implementar a função handleLogout (desconectar o usuário)
+	function handleLogout() {
+		setUsuario({
+			id: 0,
+			nome: "",
+			usuario: "",
+			senha: "",
+			foto: "",
+			token: "",
+		})
+	}
 
-        try {
-            await login(`/usuarios/logar`, usuarioLogin, setUsuario)
-            alert("Usuário Autenticado com Sucesso!")
-        } catch (error) {
-            if (axios.isAxiosError(error) && error.response) {
-                alert(`Erro ao autenticar usuário: ${error.response.status}`)
-                console.log('Resposta da API: erro.message')
-            } else {
-                alert("Erro ao autenticar o usuário! Verifique a conexão com a API!")
-            }
-        } finally {
-            setIsLoading(false)
-        }
-    }
-    function handleLogout() {
-        setUsuario({
-            id: 0,
-            nome: '',
-            usuario: '',
-            senha: '',
-            foto: '',
-            token: '',
-        })
-    }
-
-    return (
-        <AuthContext.Provider value={{ usuario, handleLogin, handleLogout, isLoading }}>
-            {children}
-        </AuthContext.Provider>
-    )
+	return (
+		<AuthContext.Provider
+			value={{ usuario, handleLogin, handleLogout, isLoading }}
+		>
+			{children}
+		</AuthContext.Provider>
+	)
 }

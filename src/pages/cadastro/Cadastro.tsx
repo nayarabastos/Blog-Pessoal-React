@@ -1,19 +1,20 @@
-import axios from "axios"
-import { useEffect, useState, type ChangeEvent, type SyntheticEvent } from "react"
-import { useNavigate } from "react-router-dom"
-import type Usuario from "../../models/Usuario"
-import { cadastrarUsuario } from "../../services/Service"
-import { ClipLoader } from "react-spinners"
+import { useEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import type Usuario from "../../models/Usuario";
+import { cadastrarUsuario } from "../../services/Service";
+import axios from "axios";
+import { ClipLoader } from "react-spinners";
 
 function Cadastro() {
 
-  // Redirecionar o usuário para uma outra rota
-  const navigate = useNavigate()
+  // Objeto responsável redirecionar o usuário para uma outra rota
+  const navigate = useNavigate();
 
-  // Estado Responsável por controlar o loader (animação de carregamento)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  // Estado responsável por controlar o loader (animação de carregamento)
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Estado Responsável por guardar os dados do usuário que serão persistidos (gravados) no bd da minha API
+  // Estado responsável por guardar os dados do usuário que serão
+  // persistidos (gravados) no banoc de dados da minha API
   const [usuario, setUsuario] = useState<Usuario>({
     id: 0,
     nome: '',
@@ -22,81 +23,82 @@ function Cadastro() {
     foto: '',
   })
 
-  // HEstado responsável por guardar a senha digitada o campo confirmar senha
-  const [confirmarSenha, setConfirmmarSenha] = useState<string>('')
+  // Estado responsável por guardar a senha digitada no campo confirmar senha
+  const [confirmarSenha, setConfirmarSenha] = useState<string>('');
 
-  // Tratar efeito colateral do sucesso do cadastro 
-  // redirecionar para a página de login
-  useEffect(() => {
-    if (usuario.id !== 0) {
-      retornar()
+  // Tratar do efeito colateral do sucesso do cadastro
+  // Redirecionar para a página de login
+  useEffect( () => {
+    if (usuario.id !== 0){
+      retornar();
     }
   }, [usuario])
 
-  // Função responsável por au=tualizar o estado usuario
-  function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
+  // Função responsável por atualizar  o estado usuario
+  function atualizarEstado(e: ChangeEvent<HTMLInputElement>){
     setUsuario({
       ...usuario,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     })
   }
 
-  // Função Responsável por atualizar o estado connfirmarSenha
-  function handleConfirmarSenha(e: ChangeEvent<HTMLInputElement>) {
-    setConfirmmarSenha(e.target.value)
+  // Função responsável por atualizar o estado confirmarSenha
+  function handleConfirmarSenha(e: ChangeEvent<HTMLInputElement>){
+    setConfirmarSenha(e.target.value);
   }
 
-  // Função responsável por enviar uma requisição do tipo POST com os dados do usuário
-  async function cadastrarNovoUsuario(e: SyntheticEvent<HTMLFormElement>) {
 
-    // Impede o envio automátioco do formulário
-    e.preventDefault()
+  // Função responsável por enviar uma requisição do tipo POST
+  // com oa dados do usuário (estado usuario)
+  async function cadastrarNovoUsuario(e: SyntheticEvent<HTMLFormElement>){
 
-    // Validação da senha digitada
-    if (confirmarSenha !== usuario.senha || usuario.senha.length < 8) {
-      alert("Senhas não confererem e/ou não possuem pelo menos 8 caracteres")
-      setUsuario({ ...usuario, senha: '' })
-      setConfirmmarSenha('')
-      return
+    // Impedet o envio automático do formulário
+    e.preventDefault();
+
+    // Validção da senha digitada
+    if (confirmarSenha !== usuario.senha || usuario.senha.length < 8){
+      alert("Senhas não conferem e/ou não possuem pelo menos 8 caracteres");
+      setUsuario({...usuario, senha: ''});
+      setConfirmarSenha('');
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
-    try {
-      await cadastrarUsuario(`/usuarios/cadastrar`, usuario, setUsuario)
-      alert("usuário cadastrado com sucesso!")
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        alert(`Erro ao cadastrar usuário: ${error.response.status}`)
-        console.log('Resposta da API: erro.message')
-      } else {
-        alert("Erro ao cadastrar o usuário! Verifique a conexão com a API!")
-      }
-    } finally {
-      setIsLoading(false)
+    try{
+        await cadastrarUsuario(`/usuarios/cadastrar`, usuario, setUsuario);
+        alert("Usuário cadastrado com sucesso!");
+    }catch(error){
+       if (axios.isAxiosError(error)) {
+				alert(`Erro ao cadastrar o usuário (${error.response?.status})`)
+        return;
+			}
+    } finally{
+      setIsLoading(false);
     }
+
   }
 
-  //  Função para retornar para página inicial
-  function retornar() {
-    navigate('/')
+  // Função mpara retornar para a página de login
+  function retornar(){
+    navigate('/');
   }
 
-  console.log(JSON.stringify(usuario))
-  console.log("Confirma Senha: ", confirmarSenha)
+  console.log(JSON.stringify(usuario));
+  console.log("Confirmar Senha: ", confirmarSenha);
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 h-screen
+      <div className="grid grid-cols-1 lg:grid-cols-2 h-screen 
             place-items-center font-bold">
         <div
           className="bg-[url('https://i.imgur.com/ZZFAmzo.jpg')] lg:block hidden bg-no-repeat 
                     w-full min-h-screen bg-cover bg-center"
         ></div>
-        <form className="flex justify-center items-center flex-col w-2/3 gap-3"
+        <form className='flex justify-center items-center flex-col w-2/3 gap-3' 
           onSubmit={cadastrarNovoUsuario}
         >
-          <h2 className="text-slate-900 text-5xl">Cadastrar</h2>
+          <h2 className='text-slate-900 text-5xl'>Cadastrar</h2>
           <div className="flex flex-col w-full">
             <label htmlFor="nome">Nome</label>
             <input
@@ -110,12 +112,12 @@ function Cadastro() {
             />
           </div>
           <div className="flex flex-col w-full">
-            <label htmlFor="usuario">Usuário</label>
+            <label htmlFor="usuario">Usuario</label>
             <input
-              type="email"
+              type="text"
               id="usuario"
               name="usuario"
-              placeholder="Usuário"
+              placeholder="Usuario"
               className="border-2 border-slate-700 rounded p-2"
               value={usuario.usuario}
               onChange={(e: ChangeEvent<HTMLInputElement>) => atualizarEstado(e)}
@@ -155,30 +157,34 @@ function Cadastro() {
               className="border-2 border-slate-700 rounded p-2"
               value={confirmarSenha}
               onChange={(e: ChangeEvent<HTMLInputElement>) => handleConfirmarSenha(e)}
+
             />
           </div>
           <div className="flex justify-around w-full gap-8">
-            <button
-              type="reset"
-              className="rounded text-white bg-red-400 hover:bg-red-700 w-1/2 py-2 cursor-pointer"
-              onClick={retornar}
-            >
-              Cancelar
+            <button 
+                type='reset'
+                className='rounded text-white bg-red-400 hover:bg-red-700 w-1/2 py-2 cursor-pointer'
+                onClick={retornar}
+             >
+                Cancelar
             </button>
-            <button
-              type="submit"
-              className="rounded text-white bg-indigo-400 hover:bg-indigo-900 w-1/2 py-2 flex justify-center cursor-pointer"
-            >
-              {
-                isLoading ? (
-                  <ClipLoader
-                    color="#ffffff"
-                    size={24}
-                  />
-                ) : (
-                  <span>Cadastrar</span>
-                )
-              }
+            <button 
+                type='submit'
+                className='rounded text-white bg-indigo-400 
+                           hover:bg-indigo-900 w-1/2 py-2
+                           flex justify-center cursor-pointer' 
+                >
+                {
+                  isLoading ? (
+                      <ClipLoader
+                        color="#ffffff"
+                        size={24}
+                      />
+                  ):(
+                    <span>Cadastrar</span>
+                  )
+                }
+              
             </button>
           </div>
         </form>
